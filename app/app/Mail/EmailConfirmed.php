@@ -31,6 +31,6 @@ class EmailConfirmed extends Mailable
      */
     public function build()
     {
-        return $this->view('view.name')->with(['code' => $this->code]);
+        return $this->view('confirm')->with(['code' => $this->code]);
     }
 }

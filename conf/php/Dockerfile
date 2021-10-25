@@ -18,7 +18,7 @@ RUN docker-php-ext-install \
         zip
 
 RUN pecl install imagick sync redis
-RUN docker-php-ext-enable imagick
+RUN docker-php-ext-enable imagick sync redis
 
 RUN docker-php-ext-install opcache
 
