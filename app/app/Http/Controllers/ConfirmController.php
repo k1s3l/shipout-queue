@@ -30,5 +30,7 @@ class ConfirmController extends Controller
     {
         $queue = Redis::connection()->client()
             ->zRange('queues:email:delayed', 0, -1);
+
+        response()->json($queue);
     }
 }

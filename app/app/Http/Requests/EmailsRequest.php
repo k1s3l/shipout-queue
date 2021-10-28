@@ -25,7 +25,7 @@ class EmailsRequest extends JsonRequest
     public function rules()
     {
         return [
-            'email' => 'email:rfc,dns,spoof',
+            'email' => 'required|email:rfc,dns,spoof',
         ];
     }
 }
