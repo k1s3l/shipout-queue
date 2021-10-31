@@ -13,6 +13,8 @@ services:
     restart: always
     volumes:
       - ./app:/var/www/html
+      - ./conf/php/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+      - ./conf/php/php.ini:/usr/local/etc/php.ini
 
   redis:
     image: redis:6-alpine

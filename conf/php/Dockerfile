@@ -22,11 +22,12 @@ RUN docker-php-ext-enable imagick sync redis
 
 RUN docker-php-ext-install opcache
 
-ADD php.ini /usr/local/etc/
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 RUN wget https://getcomposer.org/installer -O - -q | php -- --install-dir=/bin --filename=composer --quiet
 
 RUN usermod -u ${UID} www-data && groupmod -g ${UID} www-data
 
+RUN chown -R www-data:www-data /var/log/supervisor
+
 USER ${UID}:${UID}
+
+CMD ["/usr/bin/supervisord"]
