@@ -12,17 +12,17 @@ class EmailConfirmed extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private $code;
-
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct(string $code)
-    {
-        $this->code = $code;
-    }
+//    private $code;
+//
+//    /**
+//     * Create a new message instance.
+//     *
+//     * @return void
+//     */
+//    public function __construct(string|callable $code)
+//    {
+//        $this->code = $code;
+//    }
 
     /**
      * Build the message.
@@ -31,6 +31,6 @@ class EmailConfirmed extends Mailable
      */
     public function build()
     {
-        return $this->view('confirm')->with(['code' => $this->code]);
+        return $this->view('confirm')->with(['code' => mt_rand(100000, 999999)]);
     }
 }

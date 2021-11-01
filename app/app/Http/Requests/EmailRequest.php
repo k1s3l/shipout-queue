@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
-class EmailsRequest extends JsonRequest
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+
+class EmailRequest extends JsonRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,10 +24,8 @@ class EmailsRequest extends JsonRequest
      */
     public function rules()
     {
-        return collect($this->request->get('emails'))
-            ->mapWithKeys(static function ($item, $key) {
-                return ["emails.{$key}" => 'email:rfc,dns,spoof'];
-            })
-            ->toArray() + ['emails' => 'array|required'];
+        return [
+            'email' => 'required|email:rfc,dns,spoof',
+        ];
     }
 }
