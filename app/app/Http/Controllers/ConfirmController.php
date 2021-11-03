@@ -8,6 +8,8 @@ use App\Mail\EmailConfirmed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
+use Nexmo\Laravel\Facade\Nexmo;
+use Symfony\Component\HttpFoundation\Request;
 
 class ConfirmController extends Controller
 {
@@ -16,7 +18,7 @@ class ConfirmController extends Controller
         $mailable = Mail::to($request->validated())
             ->later(
                 now()->addSecond(5),
-                (new EmailConfirmed())->onConnection('redis')->onQueue('email')
+                (new EmailConfirmed(mt_rand(000000, 999999)))->onConnection('redis')->onQueue('email')
             );
 
         return response()->json([
@@ -36,7 +38,7 @@ class ConfirmController extends Controller
 
         $messages = Mail::to($emails)->later(
             now()->addSecond(5),
-            (new EmailConfirmed())
+            (new EmailConfirmed(mt_rand(000000, 999999)))
                 ->onConnection('redis')
                 ->onQueue('email')
         );
@@ -47,11 +49,16 @@ class ConfirmController extends Controller
         ]);
     }
 
-    public function item()
+    public function sms(Request $request)
     {
-        $queue = Redis::connection()->client()
-            ->zRange('queues:email:delayed', 0, -1);
+        app('Nexmo\Client')->message()->send([
+            'from' => 'VONAGE',
+            'to' => $request->get('phone'),
+            'text' => 'Code is: ' . mt_rand(0000, 9999),
+        ]);
 
-        response()->json($queue);
+        return response()->json([
+            'success' => true,
+        ]);
     }
 }
