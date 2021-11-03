@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\EmailRequest;
 use App\Http\Requests\EmailsRequest;
+use App\Http\Requests\SmsRequest;
 use App\Mail\EmailConfirmed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Nexmo\Laravel\Facade\Nexmo;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -49,16 +52,21 @@ class ConfirmController extends Controller
         ]);
     }
 
-    public function sms(Request $request)
+    public function sms(SmsRequest $request)
     {
-        app('Nexmo\Client')->message()->send([
-            'from' => 'VONAGE',
-            'to' => $request->get('phone'),
-            'text' => 'Code is: ' . mt_rand(0000, 9999),
-        ]);
+        $validation = Validator::make(['phone' => $request->phone], [Rule::phone()->country(['RU'])]);
+
+        if ($is_us = $validation->errors()->count()) {
+            app('Nexmo\Client')->message()->send([
+                'from' => 'VONAGE',
+                'to' => $request->get('phone'),
+                'text' => 'Code is: ' . mt_rand(0000, 9999),
+            ]);
+        }
 
         return response()->json([
             'success' => true,
+            'is_us' => (bool)$is_us,
         ]);
     }
 }

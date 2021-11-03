@@ -12,6 +12,7 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "nexmo/laravel": "^2.4",
+        "propaganistas/laravel-phone": "^4.3",
         "sendpulse/rest-api": "^1.0"
     },
     "require-dev": {
