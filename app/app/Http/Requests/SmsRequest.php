@@ -22,7 +22,7 @@ class SmsRequest extends JsonRequest
     public function rules()
     {
         return [
-            'phone' => 'required|phone:mobile',
+            'phone' => 'required|phone:AUTO,RU,US',
         ];
     }
 }
