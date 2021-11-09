@@ -14,8 +14,12 @@ class ConfirmToken extends Model
 
     use HasFactory;
 
-    public function setExpiredAtAttribute()
+    public static function boot()
     {
-         $this->attributes['expired_at'] = now()->addMinutes(self::CODE_LIFETIME);
+        parent::boot();
+
+        static::creating(static function (ConfirmToken $model) {
+            $model->expired_at = now()->addMinutes(self::CODE_LIFETIME);
+        });
     }
 }

@@ -27,6 +27,7 @@ Route::group(['prefix' => '/confirm'], static function () {
     });
     Route::group(['prefix' => 'sms'], static function () {
         Route::get('/', [ConfirmController::class, 'sms']);
+        Route::post('/{token}', [ConfirmController::class, 'smsCode']);
     });
     Route::group(['prefix' => 'emails'], static function () {
         Route::post('/', [ConfirmController::class, 'emails']);
