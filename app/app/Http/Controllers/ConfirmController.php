@@ -85,7 +85,7 @@ class ConfirmController extends Controller
     public function smsCode(Request $request, $token)
     {
         $confirmToken = ConfirmToken::where(['token' => $token])->first();
-        if ($confirmToken->code == $request->get('code')) {
+        if ($confirmToken->code == $request->get('code') && $confirmToken->confirmed) {
             $confirmToken->confirmed = false;
             $confirmToken->save();
 
