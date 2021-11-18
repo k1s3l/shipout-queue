@@ -6,9 +6,9 @@ use Illuminate\Http\Request;
 
 class WebhookController extends Controller
 {
-    public function sms()
+    public function sms(Request $request)
     {
-
+        logger($request->all());
     }
 
     public function email()

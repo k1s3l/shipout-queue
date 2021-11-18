@@ -34,10 +34,11 @@ class SmsNexmo implements ShouldQueue
      */
     public function handle()
     {
-        Nexmo::message()->send([
+        $message = Nexmo::message()->send([
             'from' => 'VONAGE',
             'to' => $this->phone,
             'text' => "Code is: {$this->code} ",
         ]);
+        logger($message);
     }
 }
