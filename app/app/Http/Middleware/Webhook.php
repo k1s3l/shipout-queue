@@ -16,10 +16,6 @@ class Webhook
      */
     public function handle(Request $request, Closure $next)
     {
-        if ($request->header('token') != env('WEBHOOK_TOKEN')) {
-            return route('login');
-        };
-
-        return $next($request);
+        return $request->header('token') != env('WEBHOOK_TOKEN') ? $next($request) : route('login');
     }
 }

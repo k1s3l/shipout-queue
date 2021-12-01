@@ -9,9 +9,9 @@ use Illuminate\Validation\Rule;
 
 class ConfirmTokenRequest extends JsonRequest
 {
-    private $confirmToken;
-
     use Queryable;
+
+    private $confirmToken;
 
     /**
      * Determine if the user is authorized to make this request.
@@ -31,24 +31,31 @@ class ConfirmTokenRequest extends JsonRequest
     public function rules()
     {
         return [
-            'code' => ['required', new Compare($this->confirmToken->code)],
+            'code' => ['required', Rule::exists('confirm_tokens')->where(function ($query) {
+                return $query->where('code', $this->code);
+            })],
             'token' => [
                 Rule::exists('confirm_tokens')->where(function ($query) {
                     return $this->confirmToken = $query->where('token', $this->token)->first();
                 }),
             ],
 
-            Rule::when(['expired_at' => $this->confirmToken->expired_at], ['expired_at' => static function ($value) {
-                return now()->greaterThanOrEqualTo($value);
-            }]),
+//            Rule::when(['expired_at' => $this->confirmToken->expired_at], ['expired_at' => static function ($value) {
+//                return now()->greaterThanOrEqualTo($value);
+//            }]),
         ];
     }
 
-    public function messages()
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
     {
-        return parent::messages() + [
-            'code.compare' => 'Неверный код подтверждения',
-            'expired_at' => 'Время жизни кода истекло'
-        ];
+        $validator->after(function ($validator) {
+            dd($this->confirmToken);
+        });
     }
 }

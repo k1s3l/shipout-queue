@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\EmailHandle;
+use App\Classes\PushHandle;
+use App\Classes\SmsHandle;
+use App\Http\Requests\ConfirmTokenRequest;
 use App\Http\Requests\EmailRequest;
 use App\Http\Requests\EmailsRequest;
 use App\Http\Requests\SmsRequest;
 use App\Jobs\SmsNexmo;
 use App\Mail\EmailConfirmed;
 use App\Models\ConfirmToken;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
@@ -57,12 +64,17 @@ class ConfirmController extends Controller
 
     public function sms(SmsRequest $request)
     {
+        $chain = new PushHandle();
+        $chain->setHandle(new SmsHandle())->setHandle(new EmailHandle());
+        $channel = $chain->handle(User::where(['email' => 'iks3lewil@yandex.ru'])->first());
+
+        return response()->json(['channel' => $channel]);
+
         $validation = Validator::make(['phone' => $request->phone], [
             'phone' => Rule::phone()->country(['RU']),
         ]);
 
-        $code = Str::random(6);
-        $token = Str::random(64);
+        list($code, $token)  = [Str::random(6), Str::random(64)];
 
         if (!$is_us = $validation->errors()->count()) {
             dispatch(new SmsNexmo($request->phone, $code))
@@ -82,16 +94,13 @@ class ConfirmController extends Controller
         ]);
     }
 
-    public function smsCode(Request $request, $token)
+    public function smsCode(ConfirmTokenRequest $request, $token)
     {
         $confirmToken = ConfirmToken::where(['token' => $token])->first();
-        if ($confirmToken->code == $request->get('code') && $confirmToken->confirmed) {
-            $confirmToken->confirmed = false;
-            $confirmToken->save();
+        $confirmToken->confirmed = false;
 
-            return response()->json($confirmToken->toArray() + ['success' => 'Указан верный код']);
-        }
+        $user = User::create(['email' => 'kis3lewil@yandex.ru', 'name' => 'USER', 'password' => '1234']);
 
-        return response()->json(['success' => 'Указан неверный код']);
+        return response()->json($user);
     }
 }
