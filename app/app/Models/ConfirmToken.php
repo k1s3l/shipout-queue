@@ -22,4 +22,9 @@ class ConfirmToken extends Model
             $model->expired_at = now()->addMinutes(self::CODE_LIFETIME);
         });
     }
+
+    public function getRouteKeyName()
+    {
+        return 'token';
+    }
 }

@@ -5,14 +5,11 @@ namespace App\Http\Requests;
 use App\Models\ConfirmToken;
 use App\Rules\Compare;
 use App\Traits\Queryable;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ConfirmTokenRequest extends JsonRequest
+class ConfirmTokenRequest extends FormRequest
 {
-    use Queryable;
-
-    private $confirmToken;
-
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,31 +28,7 @@ class ConfirmTokenRequest extends JsonRequest
     public function rules()
     {
         return [
-            'code' => ['required', Rule::exists('confirm_tokens')->where(function ($query) {
-                return $query->where('code', $this->code);
-            })],
-            'token' => [
-                Rule::exists('confirm_tokens')->where(function ($query) {
-                    return $this->confirmToken = $query->where('token', $this->token)->first();
-                }),
-            ],
-
-//            Rule::when(['expired_at' => $this->confirmToken->expired_at], ['expired_at' => static function ($value) {
-//                return now()->greaterThanOrEqualTo($value);
-//            }]),
+            'code' => ['string', 'required']
         ];
-    }
-
-    /**
-     * Configure the validator instance.
-     *
-     * @param  \Illuminate\Validation\Validator  $validator
-     * @return void
-     */
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            dd($this->confirmToken);
-        });
     }
 }

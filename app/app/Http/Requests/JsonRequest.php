@@ -19,7 +19,7 @@ class JsonRequest extends FormRequest
                 'type' => 'https://example.net/validation-error',
                 'title' => "Your request parameters didn't validate",
                 'invalid-params' => $errors,
-            ], Response::HTTP_BAD_REQUEST),
+            ], 400),
         );
     }
 }

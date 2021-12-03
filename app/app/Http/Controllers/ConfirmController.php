@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Nexmo\Laravel\Facade\Nexmo;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -64,17 +65,19 @@ class ConfirmController extends Controller
 
     public function sms(SmsRequest $request)
     {
-        $chain = new PushHandle();
-        $chain->setHandle(new SmsHandle())->setHandle(new EmailHandle());
-        $channel = $chain->handle(User::where(['email' => 'iks3lewil@yandex.ru'])->first());
+//        https://laravel.demiart.ru/laravel-sozdayom-svoi-sobstvennye-funktsii/
+//        https://laravel.demiart.ru/macros/
+//        $chain = new PushHandle();
+//        $chain->setHandle(new SmsHandle())->setHandle(new EmailHandle());
+//        $channel = $chain->handle(User::where(['email' => 'iks3lewil@yandex.ru'])->first());
 
-        return response()->json(['channel' => $channel]);
+//        return response()->json(['channel' => $channel]);
 
         $validation = Validator::make(['phone' => $request->phone], [
             'phone' => Rule::phone()->country(['RU']),
         ]);
 
-        list($code, $token)  = [Str::random(6), Str::random(64)];
+        [$code, $token]  = [Str::random(6), Str::random(64)];
 
         if (!$is_us = $validation->errors()->count()) {
             dispatch(new SmsNexmo($request->phone, $code))
@@ -94,13 +97,14 @@ class ConfirmController extends Controller
         ]);
     }
 
-    public function smsCode(ConfirmTokenRequest $request, $token)
+    public function smsCode(ConfirmTokenRequest $request, ConfirmToken $token)
     {
-        $confirmToken = ConfirmToken::where(['token' => $token])->first();
-        $confirmToken->confirmed = false;
+        $this->validate($request, [
+            'code' => [
+                static fn ($attribute, $value, $fail) => $value == $token->code ?: $fail('Неверный код'),
+            ],
+        ]);
 
-        $user = User::create(['email' => 'kis3lewil@yandex.ru', 'name' => 'USER', 'password' => '1234']);
-
-        return response()->json($user);
+        return response()->json(['success' => true]);
     }
 }
