@@ -11,9 +11,12 @@ class MapFactory implements FactoryInterface, ContainerInterface
 
     protected array $cache = [];
 
-    public function __construct(array $container)
+    protected $client;
+
+    public function __construct(array $container, $client)
     {
         $this->container = $container;
+        $this->client = $client;
     }
 
     public function get(string $id)
@@ -35,7 +38,7 @@ class MapFactory implements FactoryInterface, ContainerInterface
      */
     public function make(string $id)
     {
-        if ($this->has($id)) {
+        if (!$this->has($id)) {
             throw new NamespaceNotFoundException(
                 sprintf("Undefined map name %s", $id)
             );
@@ -43,6 +46,6 @@ class MapFactory implements FactoryInterface, ContainerInterface
 
         $class = $this->container[$id];
 
-        return new $class();
+        return new $class($this->client);
     }
 }

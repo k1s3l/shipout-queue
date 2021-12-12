@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Classes\Channels\SmsRuApi;
 use App\Classes\Decorators\DefaultDecorator;
 use App\Classes\Decorators\TimeDecorator;
 use App\Classes\EmailHandle;
@@ -72,13 +73,7 @@ class ConfirmController extends Controller
                 ->onConnection('redis')
                 ->onQueue('sms');
         } else {
-            $wrappers = (new TimeDecorator(new DefaultDecorator, null))->setOption([
-                'to' => [
-                    '79051092782' => 'text',
-                    '79051092783' => 'msg',
-                ],
-            ]);
-            dd($wrappers);
+            app(SmsRuApi::class)->sms()->send($request->phone, $code);
         }
 
         ConfirmToken::create([

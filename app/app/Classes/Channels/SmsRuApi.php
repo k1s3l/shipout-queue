@@ -6,6 +6,7 @@ use GuzzleHttp\Client as HttpClient;
 use App\Classes\{
     BulkSMS\Client as BulkSMSClient,
     SMS\Client as SMSClient,
+    Call\Client as CallClient,
 };
 use App\Classes\Factory\{
     FactoryInterface,
@@ -18,6 +19,10 @@ use Psr\{
 
 class SmsRuApi
 {
+    public const VERSION = '1.0';
+
+    public const BASE_URL = 'https://sms.ru';
+
     /**
      * @return array
      */
@@ -35,15 +40,18 @@ class SmsRuApi
 
     public function __construct(
         array $config, ClientInterface $httpClient = new HttpClient
-    ) {
+    )
+    {
         $this->_apiId = $config['api_id'];
         $this->httpClient = $httpClient;
         $this->setFactory(
             new MapFactory(
                 [
-                    'send' => SMSClient::class,
-                    'bulkSend' => BulkSMSClient::class
-                ]
+                    'sms' => SMSClient::class,
+                    'bulkSms' => BulkSMSClient::class,
+                    'call' => CallClient::class,
+                ],
+                $this
             )
         );
     }
@@ -51,19 +59,23 @@ class SmsRuApi
 
     public function __call($name, $args)
     {
-        $class = $this->factory->get($name);
-        call_user_func_array($class, $args);
+        return $this->factory->get($name);
     }
 
-    public function setFactory(FactoryInterface&ContainerInterface $factory)
+    public function setFactory(FactoryInterface&ContainerInterface $factory): self
     {
         $this->factory = $factory;
 
         return $this;
     }
 
-    public function send($options)
+    public function getCredential(): array
     {
-        return $this->httpClient->get('https://sms.ru/sms/send', $options + ['api_id' => $this->_apiId]);
+        return ['api_id' => $this->_apiId];
+    }
+
+    public function getHttpClient()
+    {
+        return $this->httpClient;
     }
 }
