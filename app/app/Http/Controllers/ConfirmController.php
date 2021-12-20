@@ -23,6 +23,13 @@ use Illuminate\Validation\ValidationException;
 
 class ConfirmController extends Controller
 {
+    private $smsRuApi;
+
+    public function __construct(SmsRuApi $smsRuApi)
+    {
+        $this->smsRuApi = $smsRuApi;
+    }
+
     public function index(EmailRequest $request)
     {
         $mailable = Mail::to($request->validated())
@@ -61,11 +68,17 @@ class ConfirmController extends Controller
 
     public function sms(SmsRequest $request)
     {
+        logger(1);
         $validation = Validator::make(['phone' => $request->phone], [
             'phone' => Rule::phone()->country(['RU']),
         ]);
 
         [$code, $token]  = [Str::random(6), Str::random(64)];
+
+        dd(
+//            $this->smsRuApi->bulkSms()->send(['+79051092782' => 'sms_1', '+79158401530' => 'sms_2'])->getBody()->getContents(),
+            $this->smsRuApi->callNumber()->check('+79051092782')->getBody()->getContents(),
+        );
 
         // is us or not
         if ($validation->errors()->count()) {

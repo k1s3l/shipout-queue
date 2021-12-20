@@ -2,13 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ConfirmToken;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class WebhookController extends Controller
 {
-    public function sms(Request $request)
+    public function vonage()
     {
-        logger($request->all());
+
+    }
+
+    public function smsRu(Request $request)
+    {
+        return response()->json(100);
     }
 
     public function email()

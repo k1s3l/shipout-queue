@@ -7,6 +7,7 @@ use App\Classes\{
     BulkSMS\Client as BulkSMSClient,
     SMS\Client as SMSClient,
     Call\Client as CallClient,
+    Callback\Client as CallbackClient,
 };
 use App\Classes\Factory\{
     FactoryInterface,
@@ -17,6 +18,15 @@ use Psr\{
     Http\Client\ClientInterface
 };
 
+/**
+ * Class SmsRuApi
+ *
+ * @method SMSClient sms()
+ * @method BulkSMSClient bulkSms()
+ * @method CallClient callNumber()
+ * @method CallbackClient callback()
+ *
+ */
 class SmsRuApi
 {
     public const VERSION = '1.0';
@@ -49,7 +59,8 @@ class SmsRuApi
                 [
                     'sms' => SMSClient::class,
                     'bulkSms' => BulkSMSClient::class,
-                    'call' => CallClient::class,
+                    'callNumber' => CallClient::class,
+                    'callback' => CallbackClient::class,
                 ],
                 $this
             )
@@ -71,7 +82,10 @@ class SmsRuApi
 
     public function getCredential(): array
     {
-        return ['api_id' => $this->_apiId];
+        return [
+            'api_id' => $this->_apiId,
+            'test' => 1,
+        ];
     }
 
     public function getHttpClient()

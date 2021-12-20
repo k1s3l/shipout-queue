@@ -39,9 +39,14 @@ Route::group(['prefix' => '/confirm'], static function () {
     });
 
     Route::group(['prefix' => 'webhook'], static function () {
-        Route::post('/sms/{token}', [WebhookController::class, 'sms'])
-            ->middleware(SmsWebhook::class);
         Route::post('/email/{token}', [WebhookController::class, 'email']);
         Route::post('/push/{token}', [WebhookController::class, 'push']);
+
+        Route::post('/sms/{token}', [WebhookController::class, 'vonage'])
+            ->middleware(SmsWebhook::class);
+
+        Route::post('sms-ru', [WebhookController::class, 'smsRu'])
+//            ->middleware(SmsWebhook::class)
+            ->name('sms_ru_callback');
     });
 });
