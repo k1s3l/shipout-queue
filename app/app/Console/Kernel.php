@@ -24,7 +24,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('ngrok_event', [
+            '--host' => 'nginx',
+        ])
+            ->runInBackground()
+            ->everyMinute()
+            ->cron('/30 1 * * *')
+            ->appendOutputTo(storage_path('logs/laravel.log'));
     }
 
     /**

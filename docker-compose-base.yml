@@ -1,10 +1,11 @@
-version: '3.3'
+version: '3.5'
 
 services:
   php:
+    container_name: php
     build: ./conf/php/
     env_file:
-      - .env
+      - ./app/.env
     links:
       - redis
       - postgres
@@ -17,12 +18,14 @@ services:
       - ./conf/php/php.ini:/usr/local/etc/php.ini
 
   redis:
+    container_name: redis
     image: redis:6-alpine
     ports:
       - '6379:6379'
     restart: always
 
   nginx:
+    container_name: nginx
     image: nginx:1.20-alpine
     ports:
       - '80:80'
@@ -34,11 +37,10 @@ services:
 
 # при изменении перебилдить docker-compose up -d --build
   postgres:
+    container_name: postgres
     image: postgres:12.0
     ports:
       - '5432:5432'
     restart: always
-#    env_file:
-#      - app/.env
     environment:
       POSTGRES_PASSWORD: laravelpassword
