@@ -21,24 +21,24 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::group(['prefix' => '/confirm'], static function () {
+Route::group(['prefix' => '/confirm'], function () {
 
-    Route::group(['prefix' => 'email'], static function () {
+    Route::group(['prefix' => 'email'], function () {
         Route::get('/', [ConfirmController::class, 'index']);
         Route::post('/code', [ConfirmController::class, 'index']);
         Route::get('/code', [ConfirmController::class, 'item']);
     });
 
-    Route::group(['prefix' => 'sms'], static function () {
+    Route::group(['prefix' => 'sms'], function () {
         Route::get('/', [ConfirmController::class, 'sms']);
         Route::post('/{token}', [ConfirmController::class, 'smsCode']);
     });
 
-    Route::group(['prefix' => 'emails'], static function () {
+    Route::group(['prefix' => 'emails'], function () {
         Route::post('/', [ConfirmController::class, 'emails']);
     });
 
-    Route::group(['prefix' => 'webhook'], static function () {
+    Route::group(['prefix' => 'webhook'], function () {
         Route::post('/email/{token}', [WebhookController::class, 'email']);
         Route::post('/push/{token}', [WebhookController::class, 'push']);
 
