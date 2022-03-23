@@ -27,4 +27,11 @@ class EmailsRequest extends JsonRequest
             })
             ->toArray() + ['emails' => 'array|required'];
     }
+
+    protected function passedValidation()
+    {
+        collect($this->request->get('emails'))->transform(static fn ($item) => [
+            'email' => $item,
+        ]);
+    }
 }
