@@ -2,17 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Classes\Channels\SmsRuApi;
-use App\Classes\Decorators\DefaultDecorator;
-use App\Classes\Decorators\TimeDecorator;
-use App\Classes\EmailHandle;
-use App\Classes\PushHandle;
-use App\Classes\SmsHandle;
 use App\Http\Requests\ConfirmTokenRequest;
 use App\Http\Requests\EmailRequest;
 use App\Http\Requests\EmailsRequest;
 use App\Http\Requests\SmsRequest;
-use App\Jobs\SmsNexmo;
+use App\Jobs\SMSNexmo;
+use App\Jobs\SMSRu;
 use App\Mail\EmailConfirmed;
 use App\Models\ConfirmToken;
 use Illuminate\Support\Facades\Mail;
@@ -23,19 +18,16 @@ use Illuminate\Validation\ValidationException;
 
 class ConfirmController extends Controller
 {
-    private $smsRuApi;
-
-    public function __construct(SmsRuApi $smsRuApi)
-    {
-        $this->smsRuApi = $smsRuApi;
-    }
-
     public function index(EmailRequest $request)
     {
         $mailable = Mail::to($request->validated())
             ->later(
                 now()->addSecond(5),
-                (new EmailConfirmed(mt_rand(000000, 999999)))->onConnection('redis')->onQueue('email')
+                (new EmailConfirmed(
+                    Str::random(config('default.code_confirm_length'))
+                ))
+                    ->onConnection('redis')
+                    ->onQueue('email')
             );
 
         return response()->json([
@@ -46,16 +38,11 @@ class ConfirmController extends Controller
 
     public function emails(EmailsRequest $request)
     {
-        $emails = collect($request->validated()['emails'])
-            ->map(static function ($item) {
-                return [
-                    'email' => $item,
-                ];
-            });
-
-        $messages = Mail::to($emails)->later(
+        $messages = Mail::to($request->emails)->later(
             now()->addSecond(5),
-            (new EmailConfirmed(mt_rand(000000, 999999)))
+            (new EmailConfirmed(
+                Str::random(config('default.code_confirm_length'))
+            ))
                 ->onConnection('redis')
                 ->onQueue('email')
         );
@@ -68,25 +55,24 @@ class ConfirmController extends Controller
 
     public function sms(SmsRequest $request)
     {
-        logger(1);
         $validation = Validator::make(['phone' => $request->phone], [
             'phone' => Rule::phone()->country(['RU']),
         ]);
 
-        [$code, $token]  = [Str::random(6), Str::random(64)];
+        [$code, $token]  = [
+            Str::random(config('default.code_confirm_length')),
+            Str::random(config('default.token_length'))
+        ];
 
-        dd(
-//            $this->smsRuApi->bulkSms()->send(['+79051092782' => 'sms_1', '+79158401530' => 'sms_2'])->getBody()->getContents(),
-            $this->smsRuApi->callNumber()->check('+79051092782')->getBody()->getContents(),
-        );
-
-        // is us or not
+        // USA mask check
         if ($validation->errors()->count()) {
-            dispatch(new SmsNexmo($request->phone, $code))
+            dispatch(new SMSNexmo($request->phone, $code))
                 ->onConnection('redis')
                 ->onQueue('sms');
         } else {
-            app(SmsRuApi::class)->sms()->send($request->phone, $code);
+            dispatch(new SMSRu($request->phone, $code))
+                ->onConnection('redis')
+                ->onQueue('sms');
         }
 
         ConfirmToken::create([
